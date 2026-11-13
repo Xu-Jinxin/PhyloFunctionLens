@@ -3,7 +3,7 @@ process IQTREE_OG {
     label "iqtree_og"
     errorStrategy 'ignore'
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     tuple val(id), path(og)
@@ -27,7 +27,8 @@ process IQTREE_OG {
 
     stub:
     """
-    touch ${id}.ufboot
+    mkdir -p iqtree_og
+    touch iqtree_og/${id}.ufboot
     """
 
 }

@@ -25,7 +25,7 @@ process GENOMESPOT {
 
     stub:
     """
-
+    mkdir -p genomespot; touch genomespot/${id}.predictions.tsv
     """
 
 }

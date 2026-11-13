@@ -23,8 +23,7 @@ process SKDER {
     
     stub:
     """
-    mkdir -p high_quality_genomes
     mkdir -p skder/Dereplicated_Representative_Genomes
-    touch skder/Dereplicated_Representative_Genomes/genome{1..9}.fasta
+    touch skder/Dereplicated_Representative_Genomes/genome{1..9}.${params.genome_extension}
     """
 }

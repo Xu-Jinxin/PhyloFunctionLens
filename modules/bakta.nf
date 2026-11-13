@@ -5,7 +5,7 @@ process BAKTA {
     publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
-    path clean_OG
+    path clean_OG, stageAs: 'OG.fa'
 
     output:
     path "bakta", emit: bakta_dir
@@ -22,7 +22,7 @@ process BAKTA {
 
     stub:
     """
-    mkdir -p bakta
+    mkdir -p bakta; touch bakta/OG.json
     """
 
 }

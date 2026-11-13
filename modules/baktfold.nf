@@ -16,7 +16,7 @@ process BAKTFOLD {
     baktfold proteins     \
         --input ${bakta_json} \
         --output baktfold \
-        --threads 8 \
+        --threads ${task.cpus} \
         --database ${container_db_path} \
         --foldseek-gpu
 

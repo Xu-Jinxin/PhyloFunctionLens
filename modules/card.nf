@@ -8,13 +8,12 @@ process CARD {
     path clean_OG
 
     output:
-    path "card", emit: card_dir
+    path "card.txt", emit: card
 
     script:
     def container_db_path = "/opt/card_db"
     
     """
-    mkdir -p card 
     rgi load --card_json ${container_db_path}/card.json --local
 
     rgi main --input_type protein  \

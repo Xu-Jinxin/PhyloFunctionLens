@@ -33,7 +33,6 @@ process HGTECTOR2 {
 
     stub:
     """
-    mkdir -p hgtector2/${id}
-    touch hgtector2/${id}/stub.txt
+    mkdir -p hgtector2/${id}/{search,analyze}
     """
 }

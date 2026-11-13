@@ -51,7 +51,7 @@ process OG_PROCESS {
     """
     rm -rf OG.fa
     mkdir -p OGfilter
-    printf "OG\tSeqID\n" > OG_rep_map.tsv
+    printf "OG\tSeqID\n" > OG_seq_map.tsv
 
     awk '/^OG[0-9]+:/ { n = \$1; sub(":", "", n); print n}' Resolved_Gene_Trees.tsv | \
         while read OG; do 

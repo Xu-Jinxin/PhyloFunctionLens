@@ -17,9 +17,6 @@ taxon="o__Flavobacteriales"
 rank="order"
 outpath="gtdb_rep_genomes"
 
-# 输出
-rep_tsv="${outpath}/representative_genome.tsv"
-acc_list="${outpath}/accessions.txt"
 
 OPTS=$(getopt -o m:g:t:r:o:h -l metadata:,genomic-reps:,taxon:,rank:,outpath:,help -n "$0" -- "$@") || usage
 eval set -- "$OPTS"
@@ -44,6 +41,10 @@ done
 if [ ! -d "${outpath}" ]; then
     mkdir -p "${outpath}"
 fi
+
+# 输出
+rep_tsv="${outpath}/representative_genome.tsv"
+acc_list="${outpath}/accessions.txt"
 
 declare -A levels=([phylum]="p__" [class]="c__" [order]="o__"
                    [family]="f__" [genus]="g__" [species]="s__") 

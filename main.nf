@@ -31,6 +31,10 @@ workflow {
                 --level must be deeper than the rank of --taxon, e.g. --taxon p__Halobacteriota --level family"""
     }
 
+    if (!params.outdir) {
+        error "Missing required parameter --outdir"
+    }
+    
     log.info "GTDB taxon        : ${params.taxon}"
     log.info "Representative    : ${params.level}"
     log.info "User genomes      : ${params.input ? params.input : 'none (GTDB representatives only)'}"
@@ -56,7 +60,7 @@ workflow {
     } else if (params.run_stage == 'stage3') {
         stage_3_only()
     } else if (params.run_stage == 'stage4') {
-        stage_4_only
+        stage_4_only()
     } else if (params.run_stage == 'stage5'){
         stage_5_only()
     } else {
