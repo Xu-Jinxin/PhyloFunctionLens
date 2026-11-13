@@ -2,7 +2,7 @@ process GENOMESPOT {
     tag "genomespot"
     label "genomespot"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     tuple val(id), path(genome), path(faa), path(gff), path(gene)

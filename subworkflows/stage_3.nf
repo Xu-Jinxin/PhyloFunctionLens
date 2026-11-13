@@ -6,7 +6,7 @@ include { BAKTA } from '../modules/bakta'
 include { BAKTFOLD} from '../modules/baktfold'
 include { EGGNOG } from '../modules/eggNOG'
 include { CAZYME } from '../modules/cazyme'
-include { RGI } from '../modules/card'
+include { CARD } from '../modules/card'
 include { VF } from '../modules/vf'
 include { MEROPS } from '../modules/merops'
 
@@ -19,7 +19,7 @@ workflow stage_3 {
     BAKTFOLD(BAKTA.out.bakta_json)
     EGGNOG(clean_OG)
     CAZYME(clean_OG)
-    RGI(clean_OG)
+    CARD(clean_OG)
     VF(clean_OG)
     MEROPS(clean_OG)
 }

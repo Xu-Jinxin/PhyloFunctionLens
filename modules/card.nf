@@ -1,8 +1,8 @@
-process RGI {
-    tag "rgi"
-    label "rgi"
+process CARD {
+    tag "card"
+    label "card"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path clean_OG
@@ -27,7 +27,7 @@ process RGI {
 
     stub:
     """
-    mkdir -p rgi
+    mkdir -p card
     """
 }
 

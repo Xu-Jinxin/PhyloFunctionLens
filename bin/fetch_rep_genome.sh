@@ -38,14 +38,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$metadata" &&  -n "$genomic_reps" && -n "$taxon" && -n "$rank" && -n "$outpath" ]] || usage
-
 [[ -f "$metadata" ]] || { echo "Error: metadata not found: $metadata" >&2; exit 1; }
 [[ -d "$genomic_reps" ]] || { echo "Error: genomic_reps not found: $genomic_reps" >&2; exit 1; }
 
 if [ ! -d "${outpath}" ]; then
     mkdir -p "${outpath}"
 fi
-
 
 declare -A levels=([phylum]="p__" [class]="c__" [order]="o__"
                    [family]="f__" [genus]="g__" [species]="s__") 
@@ -56,13 +54,11 @@ filter_and_score() {
         BEGIN { FS = OFS = "\t"
                 checkm2_completeness = 3 
                 checkm2_contamination = 4
-                checkm_completeness = 6
-                checkm_contamination = 7
                 gtdb_genome_representative = 18
                 gtdb_representative = 19
                 gtdb_taxonomy = 20 } 
         $gtdb_representative == "t" && index($gtdb_taxonomy, target) {
-            score = ($checkm2_completeness - 5*$checkm2_contamination) + ($checkm_completeness - 5*$checkm_contamination)
+            score = ($checkm2_completeness - 5*$checkm2_contamination)
             print $gtdb_genome_representative, $gtdb_taxonomy, score, $checkm2_completeness
         }' "$metadata"
 }
@@ -80,11 +76,11 @@ copy_genomes() {
     local acc_list="$1" reps="$2" out="$3"
     while IFS= read -r accession; do
         [[ -z "$accession" ]] && continue
-        local L1="${accession:0:3}"   # GCF / GCA
-        local L2="${accession:4:3}"   # 数字部分前三位，如 965 / 000
-        local src="${reps}/${L1}/${L2}/${accession}_genomic.fna.gz"
+        local L1="${accession:3:3}"   # GCF / GCA
+        local L2="${accession:7:3}"   # 数字部分前三位，如 965 / 000
+        local src="${reps}/${L1}/${L2}/${accession:3}_genomic.fna.gz"
         if [[ -f "$src" ]]; then
-            cp -v "$src" "${out}/"
+            cp -v "$src" "${out}/${accession}_genomic.fna.gz"
         else
             echo "WARN: not found: $src" >&2
         fi
@@ -100,5 +96,8 @@ filter_and_score "$metadata" "$taxon" \
 
 grep -w -v "${taxon}" "$rep_tsv" > "${rep_tsv}.tmp" && mv "${rep_tsv}.tmp" "$rep_tsv"
 
-cut -f1 "$rep_tsv" | sed -E 's/^(RS|GB)_//' > "$acc_list"
+# cut -f1 "$rep_tsv" | sed -E 's/^(RS|GB)_//' > "$acc_list"
+# copy_genomes "$acc_list" "$genomic_reps" "$outpath"
+
+cut -f1 "$rep_tsv"  > "$acc_list"
 copy_genomes "$acc_list" "$genomic_reps" "$outpath"

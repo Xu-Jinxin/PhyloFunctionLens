@@ -2,63 +2,75 @@ process ORTHOFINDER {
     tag "orthofinder"
     label "orthofinder"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path "input_proteins/*"
-    path "OGFilter.py", stageAs: "OGFilter.py"
+    path "species_tree.nwk"
 
     output:
-    path "orthofinder", emit: orthofinder_dir
-    path "orthofinder/OGfilter/*.fa", emit: filtered_OG
-    path "total_OG.clean.fa", emit: total_OG 
+    path "orthofinder/Results_*/MultipleSequenceAlignments", emit: og_dir
+    path "orthofinder/Results_*/Resolved_Gene_Trees/Resolved_Gene_Trees.txt", emit: gene_trees
 
     script:
     """
-    orthofinder -f input_proteins -t ${task.cpus} \
-        -M msa -S diamond -A mafft -T fasttree -os \
+    orthofinder \
+        -f input_proteins \
+        -M msa -S mmseqs -A mafft -T fasttree_fastest \
+        -t ${task.cpus} \
+        -X \
+        -s species_tree.nwk \
         -o orthofinder
-
-    python OGFilter.py \
-        -g orthofinder/Results_*/Orthogroups/Orthogroups.GeneCount.tsv \
-        -s orthofinder/Results_*/Orthogroup_Sequences \
-        -o orthofinder/OGfilter \
-        -max_copies 1 \
-        -min_species 8
-    
-    cat orthofinder/OGfilter/OG*.fa > total_OG.fa
-    sed '/^>/! s/[UuXx*]//g' total_OG.fa > total_OG.clean.fa
-
     """
 
     stub:
     """
-    mkdir -p orthofinder
-    """
+    mkdir -p orthofinder/Results_date/MultipleSequenceAlignments
+    touch orthofinder/Results_date/MultipleSequenceAlignments/OG{0000000..0000010}.fa
+    touch orthofinder/Results_date/Orthogroups/Orthogroups.GeneCount.tsv
 
+    """
 }
 
-process CLUSTER_ORTHOLOGS{
-    tag "cluster_OG"
-    label "cluster_OG"
+process OG_PROCESS {
+    tag "OG_process"
+    label "OG_process"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
-    path total_OG
+    path "MultipleSequenceAlignments"
+    path "Resolved_Gene_Trees.tsv"
 
     output:
-    path "total_OG_clean_70_rep_seq.fasta", emit: clean_OG
+    path "OGfilter/*.fa", emit: filtered_OG
+    path "OG.fa", emit: clean_OG
+    path "OG_seq_map.tsv", emit: og_seq_map
 
     script:
     """
-    mmseqs easy-cluster ${total_OG} total_OG_clean_70 tmp_dir \
-        --min-seq-id 0.7 \
-        --threads ${task.cpus}
+    rm -rf OG.fa
+    mkdir -p OGfilter
+    printf "OG\tSeqID\n" > OG_rep_map.tsv
+
+    awk '/^OG[0-9]+:/ { n = \$1; sub(":", "", n); print n}' Resolved_Gene_Trees.tsv | \
+        while read OG; do 
+            seqkit shuffle -s 11 "MultipleSequenceAlignments/\${OG}.fa" | \
+                seqkit head -n 1 | \
+                seqkit seq --remove-gaps >> OG.fa
+
+            seqkit seq -n -i "MultipleSequenceAlignments/\${OG}.fa" | \
+                awk -v og="\${OG}" 'BEGIN{OFS="\t"}{print og, \$0}' >> OG_seq_map.tsv
+            cp MultipleSequenceAlignments/\${OG}.fa OGfilter/
+        done
 
     """
+
     stub:
     """
-    touch total_OG_clean_70_rep_seq.fasta
+    mkdir -p OGfilter; touch OGfilter/OG{001..010}.fa
+    touch OG.fa OG_seq_map.tsv
+    mkdir -p gene_trees; touch gene_trees/OG{001..010}.tre
+
     """
 }

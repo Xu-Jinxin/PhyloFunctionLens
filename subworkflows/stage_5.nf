@@ -13,6 +13,7 @@ workflow stage_5 {
     checkm2_report
 
     main:
+
     IQTREE_OG(filtered_og_ch)
 
     families_ch = filtered_og_ch

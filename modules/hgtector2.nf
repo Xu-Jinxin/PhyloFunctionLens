@@ -2,7 +2,7 @@ process HGTECTOR2 {
     tag "${id}"
     label "hgtector2"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     tuple val(id), path(genome), path(faa), path(gff), path(gene)

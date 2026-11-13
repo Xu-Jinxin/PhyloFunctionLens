@@ -2,7 +2,7 @@ process BAKTFOLD {
     tag "baktfold"
     label "baktfold_gpu"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path bakta_json

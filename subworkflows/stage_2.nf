@@ -4,11 +4,12 @@ nextflow.enable.dsl = 2
 
 include { PYRODIGAL } from '../modules/pyrodigal'
 include { ORTHOFINDER } from '../modules/orthofinder'
-include { CLUSTER_ORTHOLOGS } from '../modules/orthofinder'
+include { OG_PROCESS } from '../modules/orthofinder'
 
 workflow stage_2 {
     take:
     rep_genomes
+    species_root_tree
 
     main:
     rep_genome_ch = rep_genomes
@@ -29,16 +30,17 @@ workflow stage_2 {
         .join(gff_ch)
         .join(gene_ch)
     
-    ORTHOFINDER(PYRODIGAL.out.protein_file.collect(), file("${projectDir}/bin/OGFilter.py"))
+    ORTHOFINDER(PYRODIGAL.out.protein_file.collect(), species_root_tree)
     
-    filtered_og_ch = ORTHOFINDER.out.filtered_OG
+    OG_PROCESS(ORTHOFINDER.out.og_dir, ORTHOFINDER.out.gene_trees)
+
+    filtered_og_ch = OG_PROCESS.out.filtered_OG
         .flatten()
         .map { OG -> tuple(OG.baseName, OG) }
-
-    CLUSTER_ORTHOLOGS(ORTHOFINDER.out.total_OG)
-
+    
     emit:
     assets_ch = assets_ch
-    clean_OG = CLUSTER_ORTHOLOGS.out.clean_OG
+    clean_OG = OG_PROCESS.out.clean_OG
     filtered_og_ch = filtered_og_ch
+
 }

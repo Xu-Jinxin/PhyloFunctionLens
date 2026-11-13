@@ -2,7 +2,7 @@ process BIGSCAPE {
     tag "bigscape"
     label "bigscape"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path antismash_dir, stageAs: 'antismash/*'

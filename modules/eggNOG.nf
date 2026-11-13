@@ -2,7 +2,7 @@ process EGGNOG {
     tag "eggNOG"
     label "eggNOG"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path clean_OG

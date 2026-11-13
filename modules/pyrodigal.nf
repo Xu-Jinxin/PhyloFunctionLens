@@ -2,7 +2,7 @@ process PYRODIGAL {
     tag "${id}"
     label "pyrodigal"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     tuple val(id), path(rep_genome)

@@ -2,7 +2,7 @@ process ALERAX {
     tag "alerax"
     label "alerax"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     tuple path(og_fastas, stageAs: "filtered_OG/*"), path(gene_trees, stageAs: "gene_trees/*")
@@ -12,15 +12,13 @@ process ALERAX {
 
     output:
     path "alerax", emit: alerax_out
-    path "family.txt", emit: family_file
-    path "missing.txt", emit: missing_file
 
     script:
     """
     mkdir -p mapping
 
     {
-        awk -F '\t' -v OFS='\t' '{name = \$1; sub(/^(RS|GB)_/, "", name); print name, (100 - \$4) / 100}' ${representative_genome_tsv}
+        awk -F '\t' -v OFS='\t' '{ print \$1, (100 - \$4) / 100 }' ${representative_genome_tsv}
         awk -F '\t' -v OFS='\t' 'NR > 1 && \$2 >= ${params.min_completeness} && \$3 <= ${params.max_contamination} {print \$1, (100 - \$2) / 100}' ${checkm2_report}
     } > missing.txt
 

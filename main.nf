@@ -21,10 +21,27 @@ include { stage_5 } from './subworkflows/stage_5'
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
 workflow {
+
+    if (!params.taxon) {
+            error """Missing required parameter --taxon (e.g. --taxon 'p__Halobacteriota' --level family)
+                  The pipeline needs a GTDB taxon and a representative rank to fetch the GTDB representatives."""
+        }
+    if (!params.level) {
+        error """Missing required parameter --level (phylum|class|order|family|genus|species)
+                --level must be deeper than the rank of --taxon, e.g. --taxon p__Halobacteriota --level family"""
+    }
+
+    log.info "GTDB taxon        : ${params.taxon}"
+    log.info "Representative    : ${params.level}"
+    log.info "User genomes      : ${params.input ? params.input : 'none (GTDB representatives only)'}"
+    log.info "Publish directory : ${params.outdir}"
+    
     if (params.run_stage == null) {
-        genomes_ch = Channel.fromPath(params.input)
+        
+        genomes_ch = params.input ? Channel.fromPath(params.input) : Channel.empty()
+
         stage_1(genomes_ch)
-        stage_2(stage_1.out.rep_genomes)
+        stage_2(stage_1.out.rep_genomes, stage_1.out.species_root_tree)
         stage_3(stage_2.out.clean_OG)
         stage_4(stage_2.out.assets_ch)
         stage_5(stage_2.out.filtered_og_ch, 
@@ -32,18 +49,31 @@ workflow {
                 stage_1.out.gtdb_rep_genomes_list, 
                 stage_1.out.checkm2_report)
 
+    } else if (params.run_stage == 'stage1'){
+        stage_1_only()
     } else if (params.run_stage == 'stage2'){
         stage_2_only()
     } else if (params.run_stage == 'stage3') {
         stage_3_only()
     } else if (params.run_stage == 'stage4') {
         stage_4_only
+    } else if (params.run_stage == 'stage5'){
+        stage_5_only()
+    } else {
+        error "Unknown --run_stage '${params.run_stage}' (supported: stage1, stage2, stage3, stage4, stage5)"
     }
 }
 
+workflow stage_1_only {
+    genomes_ch = params.input ? Channel.fromPath(params.input) : Channel.empty()
+    stage_1(genomes_ch)
+
+}
+
 workflow stage_2_only {
-    rep_genomes = Channel.fromPath(params.genome_dir)
-    stage_2(rep_genomes)
+    rep_genomes = Channel.fromPath("${params.genome_dir}/*.${params.genome_extension}")
+    species_root_tree = Channel.fromPath("${params.species_root_tree}")
+    stage_2(rep_genomes, species_root_tree)
 }
 
 workflow stage_3_only {
@@ -67,4 +97,28 @@ workflow stage_4_only {
         .join(gene_ch)
 
     stage_4(assets_ch)
+}
+
+workflow stage_5_only {
+
+    // stage_2.out.filtered_og_ch, 
+    // stage_1.out.species_root_tree, 
+    // stage_1.out.gtdb_rep_genomes_list, 
+    // stage_1.out.checkm2_report
+
+    // genome_ch = Channel.fromPath("${params.genome_dir}/*.${params.genome_extension}")
+    //     .map { genome -> tuple(genome.baseName, genome) }
+    // protein_ch = Channel.fromPath("${params.proteins_dir}/*.faa")
+    //     .map { faa -> tuple(faa.name.replaceFirst(/\.faa$/, ''), faa) }
+    // gff_ch = Channel.fromPath("${params.gff_dir}/*.gff")
+    //     .map { gff -> tuple(gff.name.replaceFirst(/\.gff$/, ''), gff) }
+    // gene_ch = Channel.fromPath("${params.genes_dir}/*.genes.fa")
+    //     .map { gene -> tuple(gene.name.replaceFirst(/\.genes\.fa$/, ''), gene) }
+
+    // assets_ch = genome_ch
+    //     .join(protein_ch)
+    //     .join(gff_ch)
+    //     .join(gene_ch)
+
+    // stage_5(assets_ch)
 }

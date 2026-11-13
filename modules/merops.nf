@@ -2,7 +2,7 @@ process MEROPS {
     tag "merops"
     label "merops"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path clean_OG

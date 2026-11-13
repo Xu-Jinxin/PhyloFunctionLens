@@ -2,7 +2,7 @@ process SKDER {
     tag "skder"
     label "skder"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path high_quality_genomes_dir

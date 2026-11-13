@@ -3,7 +3,7 @@ process CHECKM2 {
     tag "checkm2"
     label "checkm2"
 
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path genomes_dir
@@ -16,9 +16,9 @@ process CHECKM2 {
     def container_db_path = '/opt/checkm2_db/uniref100.KO.1.dmnd'
     """
     checkm2 predict \
-        --input "${genomes_dir}" \
+        --input ${genomes_dir} \
         --output-directory checkm2 \
-        --database_path "${container_db_path}" \
+        --database_path ${container_db_path} \
         --threads ${task.cpus} \
         -x ${params.genome_extension} \
         --force
@@ -34,14 +34,14 @@ process CHECKM2 {
 process FILTER_GENOMES {
     tag "filter_genomes"
     label "filter_genomes"
-    publishDir "${params.outdir}/gencomp/", mode: 'symlink'
+    publishDir "${params.outdir}/PhyloFunctionLens/", mode: 'symlink'
 
     input:
     path checkm2_dir
     path genomes_dir
 
     output:
-    path "high_quality_genomes", emit: high_quality_genomes_dir
+    path "high_quality_genomes", emit: genomes_dir
 
     script:
     """
